@@ -47,11 +47,11 @@ resource "aws_route_table_association" "route" {
 
 resource "aws_instance" "node" {
   count         = "${var.instance_count}"
-  ami           = "${lookup(var.ami,var.aws_region)}"
+  ami           = "${var.ami}"
   subnet_id     = "${element(aws_subnet.os-subnet.*.id, count.index)}" 
   instance_type = "${var.instance_type}"
   key_name      = "${var.key_name}"
-  user_data     = "${file("node-prep.sh")}"
+#  user_data     = "${file("node-prep.sh")}"
 
   tags = {
     Name  = "os-node-${count.index + 1}"
@@ -60,12 +60,11 @@ resource "aws_instance" "node" {
 
 # Create master & kick off install
 resource "aws_instance" "master" {
-  count         = "${var.instance_count}"
-  ami           = "${lookup(var.ami,var.aws_region)}"
+  ami           = "${var.ami}"
   subnet_id     = "${element(aws_subnet.os-subnet.*.id, count.index)}"
   instance_type = "${var.instance_type}"
   key_name      = "${var.key_name}"
-  user_data     = "${file("master-prep.sh")}"
+#  user_data     = "${file("master-prep.sh")}"
 
   tags = {
     Name  = "os-master"

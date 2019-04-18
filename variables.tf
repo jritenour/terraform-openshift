@@ -1,4 +1,5 @@
 variable "aws_zones" {
+  type = "list"
   description = "The AZ zones to deploy into"
 }
 
