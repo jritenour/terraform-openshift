@@ -43,12 +43,46 @@ resource "aws_route_table_association" "route" {
   route_table_id = "${aws_route_table.route.id}"
 }
 
+#Create security group
+
+resource "aws_security_group" "openshift-pub" {
+  name        = "openshift-all"
+  description = "Master public group for OpenShift"
+
+  ingress {
+    from_port   = 8443
+    to_port     = 8443
+    protocol    = "tcp"
+    cidr_blocks = [ "0.0.0.0/0" ]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [ "0.0.0.0/0" ]
+  }
+
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  vpc_id = "${aws_vpc.os-vpc.id}"
+}
+
+
 #Create nodes & bootstrap them w/ prereqs
 
 resource "aws_instance" "node" {
   count         = "${var.instance_count}"
   ami           = "${var.ami}"
   subnet_id     = "${element(aws_subnet.os-subnet.*.id, count.index)}" 
+  security_groups = [ "${aws_security_group.openshift-pub.id}" ]
   instance_type = "${var.instance_type}"
   key_name      = "${var.key_name}"
 #  user_data     = "${file("node-prep.sh")}"
@@ -62,6 +96,7 @@ resource "aws_instance" "node" {
 resource "aws_instance" "master" {
   ami           = "${var.ami}"
   subnet_id     = "${element(aws_subnet.os-subnet.*.id, count.index)}"
+  security_groups = [ "${aws_security_group.openshift-pub.id}" ]
   instance_type = "${var.instance_type}"
   key_name      = "${var.key_name}"
 #  user_data     = "${file("master-prep.sh")}"
