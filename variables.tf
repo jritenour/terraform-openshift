@@ -1,6 +1,7 @@
 variable "aws_zones" {
   type = "list"
   description = "The AZ zones to deploy into"
+  default =  ["us-east-1a", "us-east-1b", "us-east-1c"]
 }
 
 variable "aws_region" {
